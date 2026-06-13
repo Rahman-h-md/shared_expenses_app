@@ -1,0 +1,41 @@
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+require('dotenv').config();
+
+const healthRouter = require('./routes/health');
+const errorHandler = require('./middlewares/errorHandler');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Global Middlewares
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
+}
+
+// Routes
+app.use('/api/health', healthRouter);
+
+// Undefined Routes Handler
+app.use((req, res, next) => {
+  const err = new Error(`Route Not Found - ${req.originalUrl}`);
+  err.statusCode = 404;
+  next(err);
+});
+
+// Centralized Error Handler Middleware (Must be last)
+app.use(errorHandler);
+
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
+
+module.exports = app;
