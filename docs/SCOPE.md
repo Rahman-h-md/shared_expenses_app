@@ -82,8 +82,8 @@ CREATE TABLE groups (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Group Memberships (Enforces Temporal Tracking)
-CREATE TABLE group_memberships (
+-- 3. Memberships Table (Enforces Temporal Tracking)
+CREATE TABLE memberships (
     id SERIAL PRIMARY KEY,
     group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -92,10 +92,11 @@ CREATE TABLE group_memberships (
     status VARCHAR(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'LEFT')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT check_left_after_joined CHECK (left_at IS NULL OR left_at >= joined_at)
+    CONSTRAINT check_left_after_joined CHECK (left_at IS NULL OR left_at >= joined_at),
+    CONSTRAINT unique_group_user UNIQUE (group_id, user_id, left_at)
 );
 
-CREATE INDEX idx_memberships_group_user ON group_memberships(group_id, user_id);
+CREATE INDEX idx_memberships_group_user ON memberships(group_id, user_id);
 
 -- 4. Expenses Table
 CREATE TABLE expenses (
@@ -114,8 +115,8 @@ CREATE TABLE expenses (
 
 CREATE INDEX idx_expenses_group_date ON expenses(group_id, expense_date);
 
--- 5. Expense Splits Table
-CREATE TABLE expense_splits (
+-- 5. Expense Participants Table (Owed amounts and split details)
+CREATE TABLE expense_participants (
     id SERIAL PRIMARY KEY,
     expense_id INTEGER REFERENCES expenses(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -125,9 +126,9 @@ CREATE TABLE expense_splits (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_splits_expense_user ON expense_splits(expense_id, user_id);
+CREATE INDEX idx_participants_expense_user ON expense_participants(expense_id, user_id);
 
--- 6. Settlements Table
+-- 6. Settlements Table (Tracks peer-to-peer repayments)
 CREATE TABLE settlements (
     id SERIAL PRIMARY KEY,
     group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
@@ -143,6 +144,38 @@ CREATE TABLE settlements (
 );
 
 CREATE INDEX idx_settlements_group_members ON settlements(group_id, payer_id, payee_id);
+
+-- 7. Import Jobs Table (Tracks CSV uploads)
+CREATE TABLE import_jobs (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    uploaded_by_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    file_name VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED')),
+    total_rows INTEGER DEFAULT 0,
+    successful_rows INTEGER DEFAULT 0,
+    failed_rows INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_import_jobs_group ON import_jobs(group_id);
+
+-- 8. Import Anomalies Table (Logs detailed findings from CSV dry-runs)
+CREATE TABLE import_anomalies (
+    id SERIAL PRIMARY KEY,
+    job_id INTEGER REFERENCES import_jobs(id) ON DELETE CASCADE,
+    row_number INTEGER NOT NULL,
+    raw_data JSONB NOT NULL,
+    anomaly_code VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    severity VARCHAR(20) NOT NULL CHECK (severity IN ('CRITICAL', 'WARNING')),
+    status VARCHAR(20) DEFAULT 'UNRESOLVED' CHECK (status IN ('UNRESOLVED', 'RESOLVED', 'SKIPPED')),
+    resolved_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_import_anomalies_job ON import_anomalies(job_id);
 ```
 
 ---
