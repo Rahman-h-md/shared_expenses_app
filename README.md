@@ -41,6 +41,8 @@ shared_expenses_app/
 ├── backend/                # Express API Back-End (Node.js)
 ├── docs/                   # Detailed Architecture and Requirements Docs
 │   ├── AI_USAGE.md         # AI assistance disclosure
+│   ├── BALANCE_ENGINE_DESIGN.md# Balance formulas and settlement optimization
+│   ├── CSV_IMPORT_DESIGN.md# CSV Import module design and anomaly handling
 │   ├── DECISIONS.md        # Technical Decision Log (ADRs)
 │   └── SCOPE.md            # Functional/Non-functional specs & User Stories
 ├── frontend/               # React SPA Front-End (Vite)
@@ -53,6 +55,8 @@ shared_expenses_app/
 ## 6. Detailed Specifications
 For more detailed information regarding requirements, database structures, and design choices, please consult:
 * [SCOPE.md](file:///c:/Users/mohdh/Desktop/shared_expenses_app/shared_expenses_app/docs/SCOPE.md): Contains Functional & Non-Functional Requirements, User Stories, Database Schema, and the CSV anomaly handling log.
+* [BALANCE_ENGINE_DESIGN.md](file:///c:/Users/mohdh/Desktop/shared_expenses_app/shared_expenses_app/docs/BALANCE_ENGINE_DESIGN.md): Details the mathematical formulas, split algorithms, and debt settlement simplification logic.
+* [CSV_IMPORT_DESIGN.md](file:///c:/Users/mohdh/Desktop/shared_expenses_app/shared_expenses_app/docs/CSV_IMPORT_DESIGN.md): Details the CSV importing two-phase pipeline, anomaly detection strategy, and raw data staging storage.
 * [DECISIONS.md](file:///c:/Users/mohdh/Desktop/shared_expenses_app/shared_expenses_app/docs/DECISIONS.md): Contains the Technical Decision Log (ADRs) explaining architecture, engine patterns, and trade-off rationale.
 * [AI_USAGE.md](file:///c:/Users/mohdh/Desktop/shared_expenses_app/shared_expenses_app/docs/AI_USAGE.md): Contains AI tools usage disclosure.
 
