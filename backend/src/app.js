@@ -3,7 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const healthRouter = require('./routes/health');
+const apiRoutes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Routes
-app.use('/api/health', healthRouter);
+app.use('/api/v1', apiRoutes);
 
 // Undefined Routes Handler
 app.use((req, res, next) => {
