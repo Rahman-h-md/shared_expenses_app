@@ -3,7 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import {
   ArrowLeft, CheckCircle, XCircle, AlertTriangle, Loader2,
-  FileText, TrendingUp, TrendingDown, Info, ChevronDown, ChevronRight
+  FileText, TrendingUp, TrendingDown, Info, ChevronDown, ChevronRight,
+  Download
 } from 'lucide-react';
 
 const StatusBadge = ({ status }) => {
@@ -67,6 +68,42 @@ export default function ImportReport() {
       setCommitting(false);
     }
   };
+  
+  const handleDownloadReport = () => {
+    if (!report || !report.rows) return;
+
+    // Define CSV headers
+    const headers = ['Row Number', 'Description', 'Amount', 'Currency', 'Date', 'Status', 'Errors', 'Warnings'];
+    
+    // Map rows to CSV format
+    const csvRows = [
+      headers.join(','), // Header row
+      ...report.rows.map(row => {
+        const rowNum = row.row_number || '';
+        // Escape quotes and wrap values in quotes where necessary
+        const desc = `"${(row.description || '').replace(/"/g, '""')}"`;
+        const amt = row.amount || '0';
+        const curr = row.currency || '';
+        const dateStr = row.date || '';
+        const stat = row.status || '';
+        const errs = `"${(row.errors || []).join('; ').replace(/"/g, '""')}"`;
+        const warns = `"${(row.warnings || []).join('; ').replace(/"/g, '""')}"`;
+
+        return [rowNum, desc, amt, curr, dateStr, stat, errs, warns].join(',');
+      })
+    ].join('\n');
+
+    // Create a Blob and trigger browser download
+    const blob = new Blob([csvRows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `import_report_${importId}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const toggleRow = (idx) => {
     setExpandedRows(prev => {
@@ -107,23 +144,35 @@ export default function ImportReport() {
             <FileText size={20} className="text-violet-400" />
             Import Report
           </h1>
-          {report?.job?.status === 'COMPLETED' ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3.5 py-2 rounded-xl">
-              <CheckCircle size={13} /> Imported Successfully
-            </span>
-          ) : (
-            <button
-              id="commit-import-btn"
-              onClick={handleCommit}
-              disabled={committing || stats.success === 0}
-              className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed self-start sm:self-auto"
-            >
-              {committing ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
-              <span className="text-xs font-semibold tracking-wide">
-                Commit {stats.success} Records
+          <div className="flex flex-wrap items-center gap-3">
+            {report && (
+              <button
+                id="download-report-btn"
+                onClick={handleDownloadReport}
+                className="px-4 py-2 border border-white/[0.08] hover:border-violet-500/30 bg-slate-900/40 hover:bg-violet-500/10 text-slate-300 hover:text-violet-300 rounded-xl text-xs font-semibold tracking-wide flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <Download size={12} />
+                <span>Download CSV Report</span>
+              </button>
+            )}
+            {report?.job?.status === 'COMPLETED' ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3.5 py-2 rounded-xl">
+                <CheckCircle size={13} /> Imported Successfully
               </span>
-            </button>
-          )}
+            ) : (
+              <button
+                id="commit-import-btn"
+                onClick={handleCommit}
+                disabled={committing || stats.success === 0}
+                className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed self-start sm:self-auto"
+              >
+                {committing ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
+                <span className="text-xs font-semibold tracking-wide">
+                  Commit {stats.success} Records
+                </span>
+              </button>
+            )}
+          </div>
         </div>
 
         {error && (
