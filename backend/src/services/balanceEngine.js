@@ -63,7 +63,7 @@ async function calculateGroupBalances(groupId) {
     const settlementsReceived = parseFloat(user.settlements_received);
     const settlementsPaid = parseFloat(user.settlements_paid);
     
-    const netBalance = (totalPaid + settlementsReceived) - (totalOwed + settlementsPaid);
+    const netBalance = (totalPaid + settlementsPaid) - (totalOwed + settlementsReceived);
 
     return {
       id: user.id,

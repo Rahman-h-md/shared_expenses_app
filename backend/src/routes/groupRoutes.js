@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const { createGroup, getGroups, getGroupDetails } = require('../controllers/groupController');
-const { addMember, removeMember } = require('../controllers/membershipController');
+const { addMember, getMembers, removeMember } = require('../controllers/membershipController');
 const { createExpense, getExpenses } = require('../controllers/expenseController');
-const { createSettlement, getSettlements } = require('../controllers/settlementController');
+const { createSettlement, getSettlements, deleteSettlement } = require('../controllers/settlementController');
 const { getGroupBalances } = require('../controllers/balanceController');
 const { uploadCsv, getImportReport, commitImport } = require('../controllers/importController');
 const auth = require('../middlewares/auth');
@@ -25,6 +25,9 @@ router.get('/', getGroups);
 router.get('/:id', getGroupDetails);
 
 // --- Membership Routes ---
+// @route   GET /api/v1/groups/:id/members
+router.get('/:id/members', getMembers);
+
 // @route   POST /api/v1/groups/:id/members
 router.post('/:id/members', addMember);
 
@@ -45,12 +48,19 @@ router.post('/:id/settlements', createSettlement);
 // @route   GET /api/v1/groups/:id/settlements
 router.get('/:id/settlements', getSettlements);
 
+// @route   DELETE /api/v1/groups/:id/settlements/:settlementId
+router.delete('/:id/settlements/:settlementId', deleteSettlement);
+
 // --- Balance Route ---
 // @route   GET /api/v1/groups/:id/balances
 router.get('/:id/balances', getGroupBalances);
 
 // --- CSV Import Routes ---
-// @route   POST /api/v1/groups/:id/imports
+// Frontend uses /import (singular), keep both for compatibility
+// @route   POST /api/v1/groups/:id/import
+router.post('/:id/import', upload.single('file'), uploadCsv);
+
+// @route   POST /api/v1/groups/:id/imports (legacy)
 router.post('/:id/imports', upload.single('file'), uploadCsv);
 
 // @route   GET /api/v1/groups/:id/imports/:jobId

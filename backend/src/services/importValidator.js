@@ -1,30 +1,68 @@
 /**
+ * Parse a custom date string, supporting DD-MM-YYYY and DD/MM/YYYY formats
+ * as well as standard formats.
+ */
+function parseCustomDate(dateStr) {
+  if (!dateStr) return null;
+  const dmyRegex = /^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/;
+  const match = dateStr.trim().match(dmyRegex);
+  if (match) {
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1; // 0-indexed in JS Date
+    const year = parseInt(match[3], 10);
+    return new Date(year, month, day);
+  }
+  return new Date(dateStr);
+}
+
+/**
  * Validates a single parsed CSV row based on the Anomaly Detection Strategy.
- * @param {Object} row The parsed CSV row (e.g., { Date, Amount, Desc, PaidBy, Currency })
- * @param {Map} activeUsersMap A Map of email -> userId for relational checking
+ * @param {Object} row The parsed CSV row
+ * @param {Map} activeUsersMap A Map of email/name -> userId for relational checking
  * @returns {Array} List of anomalies found for this row
  */
 function validateRow(row, activeUsersMap) {
   const anomalies = [];
 
-  // Required Fields
-  if (!row.Date || !row.Amount || !row.Desc || !row.PaidBy) {
+  // Normalize case-insensitive field access
+  const dateVal = row.Date || row.date || row.DATE;
+  const amountVal = row.Amount || row.amount || row.AMOUNT;
+  const descVal = row.Desc || row.desc || row.Description || row.description || row.DESC || row.DESCRIPTION;
+  const paidByVal = row.PaidBy || row.paidBy || row.paid_by || row.Paid_By || row.PAID_BY;
+
+  // Required Fields Check (except paidByVal, which we'll auto-fallback on commit)
+  if (!dateVal || !amountVal || !descVal) {
     anomalies.push({
       code: 'ERR_MISSING_VAL',
-      message: 'Missing one or more required fields (Date, Amount, Desc, PaidBy).',
+      message: 'Missing one or more required fields (Date, Amount, Description).',
       severity: 'CRITICAL'
     });
   }
 
-  // Amount Validation
-  const amountNum = parseFloat(row.Amount);
-  if (!isNaN(amountNum) && amountNum <= 0) {
+  // Handle missing payer as a warning instead of critical error
+  if (!paidByVal) {
     anomalies.push({
-      code: 'ERR_NEG_AMT',
-      message: 'Expenses cannot be zero or negative.',
-      severity: 'CRITICAL'
+      code: 'WRN_MISSING_PAYER',
+      message: 'Payer is missing. The system will default to the current user (uploader).',
+      severity: 'WARNING'
     });
-  } else if (isNaN(amountNum) && row.Amount) {
+  }
+
+  // Amount Validation
+  const amountNum = parseFloat(amountVal);
+  if (!isNaN(amountNum) && amountNum < 0) {
+    anomalies.push({
+      code: 'WRN_NEG_AMT',
+      message: 'Negative amount (refund) detected. This will be imported as an inverted split expense.',
+      severity: 'WARNING'
+    });
+  } else if (!isNaN(amountNum) && amountNum === 0) {
+    anomalies.push({
+      code: 'WRN_ZERO_AMT',
+      message: 'Zero amount detected. This will be logged as a dummy 0.01 expense.',
+      severity: 'WARNING'
+    });
+  } else if (isNaN(amountNum) && amountVal) {
     anomalies.push({
       code: 'ERR_INV_AMT',
       message: 'Amount must be a valid number.',
@@ -33,14 +71,14 @@ function validateRow(row, activeUsersMap) {
   }
 
   // Date Validation
-  const parsedDate = new Date(row.Date);
-  if (row.Date && isNaN(parsedDate.getTime())) {
+  const dateParsed = parseCustomDate(dateVal);
+  if (dateVal && (!dateParsed || isNaN(dateParsed.getTime()))) {
     anomalies.push({
       code: 'ERR_INV_DATE',
-      message: `The date '${row.Date}' could not be parsed.`,
+      message: `The date '${dateVal}' could not be parsed.`,
       severity: 'CRITICAL'
     });
-  } else if (parsedDate > new Date()) {
+  } else if (dateParsed && dateParsed > new Date()) {
     anomalies.push({
       code: 'ERR_INV_DATE',
       message: 'Expense date cannot be in the future.',
@@ -48,21 +86,21 @@ function validateRow(row, activeUsersMap) {
     });
   }
 
-  // Relational Check: User Exists & is Active
-  if (row.PaidBy) {
-    const userEmail = row.PaidBy.toLowerCase().trim();
-    if (!activeUsersMap.has(userEmail)) {
+  // Relational Check: User Exists & is Active (only if provided)
+  if (paidByVal) {
+    const userEmailOrName = paidByVal.toLowerCase().trim();
+    if (!activeUsersMap.has(userEmailOrName)) {
       anomalies.push({
         code: 'ERR_USER_NOT_FOUND',
-        message: `User with email '${userEmail}' is not an active member of this group.`,
+        message: `User '${paidByVal}' is not an active member of this group.`,
         severity: 'CRITICAL'
       });
     }
   }
 
   // Warning: Settlement Logic
-  if (row.Desc) {
-    const descLower = row.Desc.toLowerCase();
+  if (descVal) {
+    const descLower = descVal.toLowerCase();
     if (descLower.includes('settle') || descLower.includes('paid back') || descLower.includes('venmo')) {
       anomalies.push({
         code: 'WRN_SETTLEMENT',
@@ -71,8 +109,6 @@ function validateRow(row, activeUsersMap) {
       });
     }
   }
-
-  // Assume other checks (Multi-currency, exact overlaps) would be implemented here in a full app
 
   return anomalies;
 }

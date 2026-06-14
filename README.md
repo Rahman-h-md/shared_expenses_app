@@ -28,7 +28,7 @@ EqualShare addresses these issues by preserving temporal membership ranges, free
 * **Frontend**: React.js (Vite), Vanilla CSS (Modular design system, sleek dark mode variables).
 * **Backend**: Node.js, Express.js.
 * **Database**: PostgreSQL (relational database for financial integrity and transactional consistency).
-* **DB Client**: Prisma ORM / pg node-postgres.
+* **DB Client**: pg node-postgres (with Connection Pooling).
 * **CSV Parsing**: PapaParse (or standard streaming csv-parser for heavy payloads).
 
 ---
@@ -82,12 +82,12 @@ For more detailed information regarding requirements, database structures, and d
    cd backend
    npm install
    ```
-   Create a `.env` file in the `backend` directory (see [Section 8](#8-environment-variables) for configuration details).
+   Create a `.env` file in the `backend` directory (you can copy the template from `.env.example` as a starting point).
 
 3. **Database Setup**
-   Run the SQL schema definition commands found in [SCOPE.md](file:///c:/Users/mohdh/Desktop/shared_expenses_app/shared_expenses_app/docs/SCOPE.md) in your PostgreSQL shell or run Prisma migrations:
+   Ensure PostgreSQL is running locally and that you have created an empty database (e.g., `equalshare_db`). Run the initialization script to automatically create all tables and indexes:
    ```bash
-   npx prisma db push
+   node src/scripts/initDb.js
    ```
 
 4. **Frontend Setup**
