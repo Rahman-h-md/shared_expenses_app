@@ -20,6 +20,15 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
+// Root route (often pinged by deployment health checkers like Render)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'EqualShare Backend API is running',
+    timestamp: new Date()
+  });
+});
+
 // Routes
 app.use('/api/v1', apiRoutes);
 
