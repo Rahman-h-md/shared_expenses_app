@@ -1,6 +1,6 @@
 # Balance Calculation Engine Design
 
-This document outlines the core algorithms, mathematical formulas, and settlement optimization (debt simplification) logic that powers the EqualShare application.
+This document outlines the core algorithms, mathematical formulas, and settlement optimization (debt simplification) logic that powers the SharePay application.
 
 ---
 

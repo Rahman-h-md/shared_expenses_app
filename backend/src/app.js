@@ -24,7 +24,7 @@ if (process.env.NODE_ENV === 'development') {
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'EqualShare Backend API is running',
+    message: 'SharePay Backend API is running',
     timestamp: new Date()
   });
 });

@@ -1,16 +1,16 @@
-# EqualShare: Transparent Shared Expenses Application
+# SharePay: Transparent Shared Expenses Application
 
 A full-stack, multi-currency shared expenses application designed to prioritize transparency, balance auditability, dynamic group memberships, and robust CSV validation.
 
 ---
 
 ## 1. Project Title
-**EqualShare** — Transparent Shared Expenses & Multi-Currency Ledger
+**SharePay** — Transparent Shared Expenses & Multi-Currency Ledger
 
 ---
 
 ## 2. Project Overview
-**EqualShare** is a modern, responsive web application that allows users to split bills, manage group balances, and settle debts in multiple currencies (USD and INR). Unlike standard expense-sharing utilities, EqualShare is built from the ground up for **absolute transparency and explainability**. Every single balance, debt, and settlement transaction is auditable through structured calculations and frozen historical parameters. It also supports CSV imports with detailed pre-commit anomaly detection and tracks group membership intervals to prevent incorrect back-dated expense assignments.
+**SharePay** is a modern, responsive web application that allows users to split bills, manage group balances, and settle debts in multiple currencies (USD and INR). Unlike standard expense-sharing utilities, SharePay is built from the ground up for **absolute transparency and explainability**. Every single balance, debt, and settlement transaction is auditable through structured calculations and frozen historical parameters. It also supports CSV imports with detailed pre-commit anomaly detection and tracks group membership intervals to prevent incorrect back-dated expense assignments.
 
 ---
 
@@ -20,7 +20,7 @@ Most peer-to-peer expense splitters operate as "black boxes," making it difficul
 * **Temporal Membership Changes**: If a member joins a group midway, platforms often split past expenses with them, or fail to handle historical data if a member leaves.
 * **Bad Import Data**: Importing expenses via CSV usually results in silent failures, duplicate entries, or mathematical mismatches without warning the user.
 
-EqualShare addresses these issues by preserving temporal membership ranges, freezing exchange rates at transaction time, implementing a mathematical balance explanation engine, and running a dry-run anomaly detector on CSV uploads.
+SharePay addresses these issues by preserving temporal membership ranges, freezing exchange rates at transaction time, implementing a mathematical balance explanation engine, and running a dry-run anomaly detector on CSV uploads.
 
 ---
 
@@ -85,7 +85,7 @@ For more detailed information regarding requirements, database structures, and d
    Create a `.env` file in the `backend` directory (you can copy the template from `.env.example` as a starting point).
 
 3. **Database Setup**
-   Ensure PostgreSQL is running locally and that you have created an empty database (e.g., `equalshare_db`). Run the initialization script to automatically create all tables and indexes:
+   Ensure PostgreSQL is running locally and that you have created an empty database (e.g., `sharepay_db`). Run the initialization script to automatically create all tables and indexes:
    ```bash
    node src/scripts/initDb.js
    ```
@@ -104,7 +104,7 @@ For more detailed information regarding requirements, database structures, and d
 ### Server Configuration (`backend/.env`)
 ```env
 PORT=5000
-DATABASE_URL="postgresql://username:password@localhost:5432/equalshare_db?schema=public"
+DATABASE_URL="postgresql://username:password@localhost:5432/sharepay_db?schema=public"
 JWT_SECRET="your_jwt_signing_key_here"
 NODE_ENV=development
 ```

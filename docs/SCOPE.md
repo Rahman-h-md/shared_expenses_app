@@ -1,6 +1,6 @@
 # Project Scope, Requirements, & Database Schema
 
-This document details the functional and non-functional requirements, user stories, relational database schema, and the CSV anomaly handling log of the **EqualShare** application.
+This document details the functional and non-functional requirements, user stories, relational database schema, and the CSV anomaly handling log of the **SharePay** application.
 
 ---
 
@@ -58,7 +58,7 @@ This document details the functional and non-functional requirements, user stori
 Below is the database schema definition with constraints and indexing rules to ensure relational integrity:
 
 ```sql
--- Database Schema for EqualShare App
+-- Database Schema for SharePay App
 
 -- 1. Users Table
 CREATE TABLE users (

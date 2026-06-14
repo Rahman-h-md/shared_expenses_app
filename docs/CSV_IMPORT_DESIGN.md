@@ -18,9 +18,10 @@ To guarantee data integrity, the import process is split into a **Dry Run (Previ
 
 ### Phase 2: Review & Commit
 1. **User Review**: The client displays the Import Report. The user maps unknown emails, corrects dates, or explicitly checks "Ignore/Bypass" on warnings (like duplicates).
-2. **Commit**: User submits the resolved rows via `POST /api/groups/:groupId/imports/:jobId/commit`.
-3. **Database Transaction**: A single PostgreSQL `BEGIN ... COMMIT` transaction inserts all valid `expenses` and `expense_participants`.
-4. **Finalize**: The `import_jobs` status updates to `COMPLETED`.
+2. **Download CSV Report**: The client provides a local download function to export the dry-run validation results as a new CSV report containing row status, error messages, and warnings for spreadsheet-based auditing.
+3. **Commit**: User submits the resolved rows via `POST /api/groups/:groupId/imports/:jobId/commit`.
+4. **Database Transaction**: A single PostgreSQL `BEGIN ... COMMIT` transaction inserts all valid `expenses` and `expense_participants`.
+5. **Finalize**: The `import_jobs` status updates to `COMPLETED`.
 
 ---
 
