@@ -2,11 +2,12 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'production';
+const requiresSSL = isProduction || (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com'));
 
 // Initialize PostgreSQL Connection Pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  ssl: requiresSSL ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('connect', () => {

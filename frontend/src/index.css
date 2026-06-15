@@ -4,11 +4,14 @@
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: "Outfit", var(--font-sans);
   --font-mono: "JetBrains Mono", monospace;
-  
-  --color-primary-accent: #8b5cf6; /* Violet */
+
+  --color-primary-accent: #8b5cf6;
+  /* Violet */
   --color-primary-accent-hover: #a78bfa;
-  --color-secondary-accent: #22d3ee; /* Cyan */
-  --color-danger-accent: #f43f5e; /* Rose */
+  --color-secondary-accent: #22d3ee;
+  /* Cyan */
+  --color-danger-accent: #f43f5e;
+  /* Rose */
 }
 
 body {
@@ -29,7 +32,7 @@ body::before {
   width: 100%;
   height: 100%;
   z-index: -1;
-  background: 
+  background:
     radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.18) 0%, transparent 45%),
     radial-gradient(circle at 100% 0%, rgba(34, 211, 238, 0.15) 0%, transparent 45%),
     radial-gradient(circle at 100% 100%, rgba(244, 63, 94, 0.08) 0%, transparent 45%),
@@ -46,7 +49,7 @@ body::after {
   width: 100%;
   height: 100%;
   z-index: -2;
-  background-image: 
+  background-image:
     linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px);
   background-size: 32px 32px;
